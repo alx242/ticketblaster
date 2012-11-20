@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+#
+
+TABLE="CREATE TABLE ticket(id INTEGER, info TEXT, done BOOLEAN, deleted BOOLEAN);"
+sqlite3 -line ticketblaster.db "$TABLE"
