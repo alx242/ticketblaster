@@ -16,15 +16,15 @@ def joinchan(ircsock, chan):
 # Responds to a user that inputs "Hello Mybot"
 def hello(ircsock, channel):
   msgs = ("Hello! I currently accept these commands:\n",
-         "insert <TICKET INFO> - Insert a new ticket\n",
-         "show                 - Display all current tickets\n",
-         "delete <TICKET ID>   - Delete a specific ticket (NOT IMPLEMENTED YET!)\n")
+         "add <TICKET INFO>  - Add a new ticket\n",
+         "show               - Display all current tickets\n",
+         "delete <TICKET ID> - Delete a specific ticket (NOT IMPLEMENTED YET!)\n")
   for msg in msgs:
     ircsock.send("PRIVMSG "+ channel +" :"+msg)
 
-def insert(ircsock, channel, info):
-  ticketdb.insert(info)
-  ircsock.send("PRIVMSG "+ channel +" :Inserted new ticket!\n")
+def add(ircsock, channel, info):
+  ticketdb.add(info)
+  ircsock.send("PRIVMSG "+ channel +" :Added new ticket!\n")
 
 def show(ircsock, channel):
   tickets = ticketdb.getall()
@@ -53,9 +53,9 @@ def loop(server, port, channel, botnick):
     if ircmsg.find("PING :") != -1:
       ping(ircsock)
 
-    # Insert a new ticket
-    if ircmsg.upper().find(": INSERT") != -1:
-      insert(ircsock, channel, ircmsg[ircmsg.upper().find(": INSERT")+8:])
+    # Add a new ticket
+    if ircmsg.upper().find(": ADD") != -1:
+      add(ircsock, channel, ircmsg[ircmsg.upper().find(": ADD")+5:])
 
     # Get all
     if ircmsg.upper().find(": SHOW") != -1:
