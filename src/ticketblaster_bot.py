@@ -15,7 +15,12 @@ def joinchan(ircsock, chan):
 
 # Responds to a user that inputs "Hello Mybot"
 def hello(ircsock, channel):
-  ircsock.send("PRIVMSG "+ channel +" :Hello!\n")
+  msgs = ("Hello! I currently accept these commands:\n",
+         "insert <TICKET INFO> - Insert a new ticket\n",
+         "show                 - Display all current tickets\n",
+         "delete <TICKET ID>   - Delete a specific ticket (NOT IMPLEMENTED YET!)\n")
+  for msg in msgs:
+    ircsock.send("PRIVMSG "+ channel +" :"+msg)
 
 def insert(ircsock, channel, info):
   ticketdb.insert(info)
@@ -41,7 +46,7 @@ def loop(server, port, channel, botnick):
     print(ircmsg) # Here we print what's coming from the server
 
     # If we can find "Hello Mybot" it will call the function hello()
-    if ircmsg.find(": Hello") != -1:
+    if ircmsg.upper().find(": HELLO") != -1:
       hello(ircsock, channel)
 
     # If the server pings us then we've got to respond!
