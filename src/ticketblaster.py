@@ -3,6 +3,7 @@
 import sys
 import getopt
 import ticketblaster_bot
+from multiprocessing import Process
 
 def usage(Exit):
   usage = "ticketblaster.py -s <server> -c <channel> -b <bot> -p <port>"
@@ -32,7 +33,14 @@ def main(argv):
       port = arg
   if server == "":
     usage(2)
-  ticketblaster_bot.loop(server, int(port), "#"+channel, botnick)
+
+  bot  = Process(target=ticketblaster_bot.loop,
+                 args=(server, int(port), "#"+channel, botnick))
+  # wsgi = Process(target=ticketblaster_wsgi.server)
+  bot.start() # Launch bot
+  bot.join()  # Wait for child process to quite
+
+  
 
 if __name__ == "__main__":
   main(sys.argv[1:])

@@ -9,7 +9,7 @@ import ticketdb
 html = """
 <html>
 <body>
-
+T I C K E T B L A S T E R
 <form method="get" action="">
 <p><input type="text" name="ticket"> <input type="submit" value="Add"></p>
 </form>
