@@ -2,5 +2,5 @@
 #
 #
 
-TABLE="CREATE TABLE ticket(id INTEGER, info TEXT, done BOOLEAN, deleted BOOLEAN);"
+TABLE="CREATE TABLE tickets(id INTEGER PRIMARY KEY, info TEXT, owner VARCHAR(32), done BOOLEAN, deleted BOOLEAN);"
 sqlite3 -line ticketblaster.db "$TABLE"

@@ -1,5 +1,5 @@
 import socket
-import sqlite3
+import ticketdb
 
 # Respond to server pings.
 def ping(ircsock):
