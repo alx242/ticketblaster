@@ -3,15 +3,35 @@
 #
 # The ticket blaster WSGI server
 from wsgiref.simple_server import make_server
-from urlparse import parse_qs
+import urlparse
 import ticketdb
 
 html = """
 <html>
+<head>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="http://www.appelsiini.net/download/jquery.jeditable.mini.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" charset="utf-8">
+ $(document).ready(function() {
+     $('.new').editable('/new', {
+         style:  'inherit',
+         method: 'POST'
+     });
+     $('.edit').editable('/edit', {
+         style:  'inherit',
+         method: 'POST'
+     });
+ });
+</script>
+</head>
+
 <body>
+
 T I C K E T B L A S T E R
-<form method="get" action="">
-<p><input type="text" name="ticket"> <input type="submit" value="Add"></p>
+
+<form method="POST" action="/new">
+<p><input type="text" name="ticket"><input type="submit" value="Add"></p>
 </form>
 
 <p>
@@ -22,26 +42,37 @@ T I C K E T B L A S T E R
 </body>
 </html>"""
 
+import urllib
 
 # The WSGI application
-def application(environ, start_response):
-    # Get all inputs
-    d = parse_qs(environ['QUERY_STRING'], keep_blank_values=1)
-    newticket = d.get("ticket")
-    # Add a new ticket
-    print "Ticket: %s" % newticket
-    if newticket != None and isinstance(newticket, list):
-        print "Added new ticket"
-        ticketdb.add(newticket[0])
+def application(env, start_response):
+    body= ''  # b'' for consistency on Python 3.0
+    try:
+        length=int(env.get('CONTENT_LENGTH', '0'))
+    except ValueError:
+        length= 0
+    if length!=0:
+        body=env['wsgi.input'].read(length)
+
+    # Add a new tickets
+    if env['PATH_INFO'] == '/new':
+        # ticketdb.add(body[0])
+        print(body)
 
     # List old tickets
     oldtickets = ""
     for t in ticketdb.getall():
-        oldtickets += "<li>"+t[1]+"</li>"
-    print "Old tickets: "+oldtickets
-    print type(oldtickets)
-    # Create web interface
-    response_body = html % {"tickets": str(oldtickets)}
+        oldtickets += ("<li>"
+                       "<div class='edit' id='desc_"+str(t[0])+"'>"+t[1]+"</div>"
+                       "<div class='edit' id='owner_"+str(t[0])+"'>"+t[1]+"</div>"
+                       "</li>")
+
+    if env['PATH_INFO'] == '/edit':
+        response_body ="BABA"
+    else:
+        # Create main web interface
+        response_body = html % {"tickets": str(oldtickets)}
+
     status = '200 OK'
     response_headers = [('Content-Type', 'text/html'),
                         ('Content-Length', str(len(response_body)))]
