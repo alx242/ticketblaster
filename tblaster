@@ -42,13 +42,15 @@ def main(argv):
       botnick = arg
     elif opt in ("-p", "--port"):
       port = arg
-  if server == "":
-    usage(2)
 
-  bot_proc  = Process(target=bot.loop,
-                      args=(server, int(port), "#"+channel, botnick))
+  if server and channel and botnick:
+    bot_proc  = Process(target=bot.loop,
+                        args=(server, int(port), "#"+channel, botnick))
+    bot_proc.start()  # Launch Bot (IRC bot interface)
+  else:
+    print "No irc server entered, no IRC bot launched"
+
   wsgi_proc = Process(target=wsgi.server)
-  bot_proc.start()  # Launch Bot (IRC bot interface)
   wsgi_proc.start() # Launch WSGI (Web interface)
 
 if __name__ == "__main__":
