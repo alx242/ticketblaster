@@ -11,19 +11,27 @@ def add(info):
   dbcon.commit()
   dbcon.close()
 
-def grab(owner, id):
+def grab(owner, index):
   dbcon = connect()
   cur = dbcon.cursor()
   cur.execute("UPDATE tickets SET owner='%(owner)s' WHERE id='%(id)s'" %
-              {"owner": owner, "id": id})
+              {"owner": owner, "id": index})
   dbcon.commit()
   dbcon.close()
 
-def delete(id):
+def delete(index):
   dbcon = connect()
   cur = dbcon.cursor()
   cur.execute("DELETE FROM tickets WHERE id='%(id)s'" %
-              {"id": id})
+              {"id": index})
+  dbcon.commit()
+  dbcon.close()
+
+def set(target, value, index):
+  dbcon = connect()
+  cur = dbcon.cursor()
+  cur.execute("UPDATE tickets SET %(target)s='%(value)s' WHERE id='%(id)s'" %
+              {"target": target, "value": value, "id": index})
   dbcon.commit()
   dbcon.close()
 
