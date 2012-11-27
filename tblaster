@@ -1,12 +1,21 @@
 #!/usr/bin/env python
-
+#
+# Simple launcer program for the T I C K E T B L A S T E R.
+#
+# Just execute to see launcher options
+#
+# See README.md for more info
+#
+#
+# MIT License
+# author: Alexander Schüssler <alex@xalx.net>
 import sys
 import getopt
 from ticketblaster import bot
 from multiprocessing import Process
 
 def usage(Exit):
-  usage = "ticketblaster.py -s <server> -c <channel> -b <bot> -p <port>"
+  usage = "tblaster -s <server> -c <channel> -b <bot> -p <port>"
   print usage
   sys.exit(Exit)
 
@@ -39,8 +48,6 @@ def main(argv):
   # wsgi = Process(target=ticketblaster_wsgi.server)
   bot.start() # Launch bot
   bot.join()  # Wait for child process to quite
-
-  
 
 if __name__ == "__main__":
   main(sys.argv[1:])
