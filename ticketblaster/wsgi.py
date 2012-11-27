@@ -9,7 +9,6 @@ import ticketdb
 html = """
 <html>
 <head>
-
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js" type="text/javascript" charset="utf-8"></script>
 <script src="http://www.appelsiini.net/download/jquery.jeditable.mini.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" charset="utf-8">
@@ -35,7 +34,6 @@ T I C K E T B L A S T E R
 </form>
 
 <p>
-<b>Tickets</b>
 %(tickets)s
 </p>
 
@@ -53,22 +51,27 @@ def application(env, start_response):
         length= 0
     if length!=0:
         body=env['wsgi.input'].read(length)
+    args = urlparse.parse_qs(body)
 
     # Add a new tickets
     if env['PATH_INFO'] == '/new':
-        # ticketdb.add(body[0])
-        print(body)
+        ticketdb.add(args.get("ticket")[0])
 
     # List old tickets
     oldtickets = ""
     for t in ticketdb.getall():
         oldtickets += ("<li>"
-                       "<div class='edit' id='desc_"+str(t[0])+"'>"+t[1]+"</div>"
-                       "<div class='edit' id='owner_"+str(t[0])+"'>"+t[1]+"</div>"
+                       "<div class='edit' style='display: inline' id='info_"+str(t[0])+"'>"+str(t[1])+"</div>"
+                       " - "
+                       "<div class='edit' style='display: inline' id='owner_"+str(t[0])+"'>"+str(t[2])+"</div>"
                        "</li>")
+    oldtickets += ""
 
     if env['PATH_INFO'] == '/edit':
-        response_body ="BABA"
+        target, index = args.get('id')[0].split('_')
+        value = args.get('value')[0]
+        ticketdb.set(target, value, index)
+        response_body = value
     else:
         # Create main web interface
         response_body = html % {"tickets": str(oldtickets)}
