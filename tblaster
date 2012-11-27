@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # Simple launcer program for the T I C K E T B L A S T E R.
 #
@@ -12,6 +13,7 @@
 import sys
 import getopt
 from ticketblaster import bot
+from ticketblaster import wsgi
 from multiprocessing import Process
 
 def usage(Exit):
@@ -43,11 +45,11 @@ def main(argv):
   if server == "":
     usage(2)
 
-  bot  = Process(target=ticketblaster_bot.loop,
-                 args=(server, int(port), "#"+channel, botnick))
-  # wsgi = Process(target=ticketblaster_wsgi.server)
-  bot.start() # Launch bot
-  bot.join()  # Wait for child process to quite
+  bot_proc  = Process(target=bot.loop,
+                      args=(server, int(port), "#"+channel, botnick))
+  wsgi_proc = Process(target=wsgi.server)
+  bot_proc.start()  # Launch Bot (IRC bot interface)
+  wsgi_proc.start() # Launch WSGI (Web interface)
 
 if __name__ == "__main__":
   main(sys.argv[1:])

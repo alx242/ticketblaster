@@ -86,6 +86,7 @@ def server():
         8051,        # Port
         application  # Function to handle request
         )
+    print "TICKETBLASTER - WSGI> Server launched and ready to serve"
     httpd.serve_forever()
 
 # Launch the server in case a recular call is done
