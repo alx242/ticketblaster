@@ -1,15 +1,15 @@
-ticket blaster
-==============
+T I C K E T B L A S T E R
+=========================
 
-Blast up small ticket using web or the irc-bot and prioritize them and complete them!
+Blast up small ticket using web or the irc-bot and grab them and complete them!
 
 
-Ticket blaster will/should contain a IRC bot and web accessor page for
+Ticket blaster will/should contain a IRC bot and web client for
 quickly organizing and accessing tickets that doesn't require
 something heavy duty like Trac or Jira
 
 Parts
-* IRC Bot
-* A WSGI accessor
+* IRC bot
+* A WSGI (web client)
 
-Very much a work in progress and thus some crap has sneaked in or is unfinished :)
+Still WIP
