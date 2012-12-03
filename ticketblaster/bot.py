@@ -65,23 +65,23 @@ def loop(server, port, channel, botnick):
       ping(ircsock)
 
     # If we can find "Hello Mybot" it will call the function hello()
-    if ircmsg.upper().find(" HELLO") != -1:
+    elif ircmsg.upper().find(" HELLO") != -1:
       hello(ircsock, channel)
 
     # Add a new ticket
-    if ircmsg.upper().find(" ADD") != -1:
+    elif ircmsg.upper().find(" ADD") != -1:
       add(ircsock, channel, ircmsg[ircmsg.upper().find(" ADD")+4:])
 
     # Get all
-    if ircmsg.upper().find(" SHOW") != -1:
+    elif ircmsg.upper().find(" SHOW") != -1:
       show(ircsock, channel)
 
     # Delete a ticket
-    if ircmsg.upper().find(" DEL") != -1:
+    elif ircmsg.upper().find(" DEL") != -1:
       delete(ircsock, channel, ircmsg[ircmsg.upper().find(" DEL")+4:])
 
     # Grab a ticket
-    if ircmsg.upper().find(" GRAB") != -1:
+    elif ircmsg.upper().find(" GRAB") != -1:
       grab(ircsock, channel,
            ircmsg[ircmsg.upper().find(":")+1:ircmsg.upper().find("!")],
            ircmsg[ircmsg.upper().find(" GRAB")+5:])
