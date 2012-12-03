@@ -1,4 +1,5 @@
 import sqlite3
+import os
 
 def connect():
   dbcon = sqlite3.connect('ticketblaster.db')
@@ -8,6 +9,19 @@ def connect():
 def close(dbcon):
   dbcon.commit()
   dbcon.close()
+
+def init():
+  dbcon, cur = connect()
+  sql = ("CREATE TABLE tickets(id INTEGER PRIMARY KEY, "
+         "info TEXT, owner VARCHAR(32), "
+         "created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+         "done BOOLEAN, "
+         "deleted BOOLEAN)")
+  cur.execute(sql)
+  close(dbcon)
+
+def already_exists():
+  return os.path.isfile("ticketblaster.db")
 
 def add(info):
   dbcon, cur = connect()

@@ -12,8 +12,7 @@
 # author: Alexander Schüssler <alex@xalx.net>
 import sys
 import getopt
-from ticketblaster import bot
-from ticketblaster import wsgi
+from ticketblaster import bot, wsgi, db
 from multiprocessing import Process
 
 def usage(Exit):
@@ -21,14 +20,24 @@ def usage(Exit):
   print usage
   sys.exit(Exit)
 
+def initdb():
+  if not db.already_exists():
+    db.init()
+    print("Database initialized")
+    sys.exit(0)
+  else:
+    print("ticketblaster database already exists, delete it and try again")
+    sys.exit(2)
+
 # Main initiatior of the ticketblaster bot
 def main(argv):
-  server  = ""
+  init    = None
+  server  = None
   channel = "bob"
   botnick = "bob"
   port    = 6667
   try:
-    opts, args = getopt.getopt(argv,"hs:c:b:p::",["server=","channel=","bot=","port="])
+    opts, args = getopt.getopt(argv,"hs:c:b:p:i",["server=", "channel=", "bot=", "port=", "initdb"])
   except getopt.GetoptError:
     usage(2)
   for opt, arg in opts:
@@ -42,6 +51,8 @@ def main(argv):
       botnick = arg
     elif opt in ("-p", "--port"):
       port = arg
+    elif opt in ("-i", "--initdb"):
+      initdb()
 
   if server and channel and botnick:
     bot_proc  = Process(target=bot.loop,
