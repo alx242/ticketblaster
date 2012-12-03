@@ -1,5 +1,5 @@
 import socket
-import ticketdb
+import db
 
 # Respond to server pings.
 def ping(ircsock):
@@ -24,22 +24,22 @@ def hello(ircsock, channel):
     ircsock.send("PRIVMSG "+channel+" :"+msg)
 
 def add(ircsock, channel, info):
-  ticketdb.add(info)
+  db.add(info)
   ircsock.send("PRIVMSG "+channel+" :Added new ticket!\n")
 
 def show(ircsock, channel):
-  tickets = ticketdb.getall()
+  tickets = db.getall()
   ircsock.send("PRIVMSG "+channel+" :Current available tickets:\n")
   for ticket in tickets:
     ircsock.send("PRIVMSG "+channel+" : - "+str(ticket[0])+
                  ": "+ticket[1].encode("utf-8")+"\n")
 
 def delete(ircsock, channel, id):
-  ticketdb.delete(id)
+  db.delete(id)
   ircsock.send("PRIVMSG "+ channel +" : Removed ticket: "+id+" \n")
 
 def grab(ircsock, channel, owner, id):
-  ticketdb.grab(owner, id)
+  db.grab(owner, id)
   ircsock.send("PRIVMSG "+channel+" : Grabbed ticket: "+id+
                ", go fix it!!! \n")
 

@@ -4,7 +4,7 @@
 # The ticket blaster WSGI server
 from wsgiref.simple_server import make_server
 import urlparse
-import ticketdb
+import db
 
 html = """
 <html>
@@ -55,11 +55,11 @@ def application(env, start_response):
 
     # Add a new tickets
     if env['PATH_INFO'] == '/new':
-        ticketdb.add(args.get("ticket")[0])
+        db.add(args.get("ticket")[0])
 
     # List old tickets
     oldtickets = ""
-    for t in ticketdb.getall():
+    for t in db.getall():
         oldtickets += ("<li>"
                        "<div class='edit' style='display: inline' id='info_"+str(t[0])+"'>"+str(t[1])+"</div>"
                        " - "
@@ -70,7 +70,7 @@ def application(env, start_response):
     if env['PATH_INFO'] == '/edit':
         target, index = args.get('id')[0].split('_')
         value = args.get('value')[0]
-        ticketdb.set(target, value, index)
+        db.set(target, value, index)
         response_body = value
     else:
         # Create main web interface
