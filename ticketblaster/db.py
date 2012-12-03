@@ -1,43 +1,42 @@
 import sqlite3
 
 def connect():
-  return sqlite3.connect('ticketblaster.db')
+  dbcon = sqlite3.connect('ticketblaster.db')
+  cur = dbcon.cursor()
+  return dbcon, cur
+
+def close(dbcon):
+  dbcon.commit()
+  dbcon.close()
 
 def add(info):
-  dbcon = connect()
-  cur = dbcon.cursor()
-  cur.execute("INSERT INTO tickets(info) VALUES('%(info)s')" %
-              {"info": info})
-  dbcon.commit()
-  dbcon.close()
+  dbcon, cur = connect()
+  cur.execute("INSERT INTO tickets(info) VALUES(?)", (info,))
+  close(dbcon)
 
 def grab(owner, index):
-  dbcon = connect()
-  cur = dbcon.cursor()
-  cur.execute("UPDATE tickets SET owner='%(owner)s' WHERE id='%(id)s'" %
-              {"owner": owner, "id": index})
-  dbcon.commit()
-  dbcon.close()
+  dbcon, cur = connect()
+  cur.execute("UPDATE tickets SET owner=? WHERE id=?", (owner, index))
+  close(dbcon)
 
 def delete(index):
-  dbcon = connect()
-  cur = dbcon.cursor()
-  cur.execute("DELETE FROM tickets WHERE id='%(id)s'" %
-              {"id": index})
-  dbcon.commit()
-  dbcon.close()
+  dbcon, cur = connect()
+  cur.execute("DELETE FROM tickets WHERE id=?", index)
+  close(dbcon)
 
 def set(target, value, index):
-  dbcon = connect()
-  cur = dbcon.cursor()
-  cur.execute("UPDATE tickets SET %(target)s='%(value)s' WHERE id='%(id)s'" %
-              {"target": target, "value": value, "id": index})
-  dbcon.commit()
-  dbcon.close()
+  dbcon, cur = connect()
+  if target in ('info', 'owner', 'created', 'done', 'deleted'):
+    sql = "UPDATE tickets SET %(target)s=? WHERE id=?" % {"target": target}
+    cur.execute(sql, (value, index))
+  else:
+    raise Exception("unsupported_sql_value")
+  close(dbcon)
 
 def getall():
-  dbcon = connect()
-  cur = dbcon.cursor()
+  dbcon, cur = connect()
   cur.execute("SELECT * FROM tickets")
-  return cur.fetchall()
+  rows = cur.fetchall()
+  close(dbcon)
+  return rows
 
