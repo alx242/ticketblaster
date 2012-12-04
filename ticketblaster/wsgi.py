@@ -4,7 +4,9 @@
 # The ticket blaster WSGI server
 from wsgiref.simple_server import make_server
 import urlparse
+import cgi
 import db
+import urllib
 
 html = """
 <html>
@@ -40,8 +42,6 @@ T I C K E T B L A S T E R
 </body>
 </html>"""
 
-import urllib
-
 # The WSGI application
 def application(env, start_response):
     body= ''  # b'' for consistency on Python 3.0
@@ -61,9 +61,9 @@ def application(env, start_response):
     oldtickets = ""
     for t in db.getall():
         oldtickets += ("<li>"
-                       "<div class='edit' style='display: inline' id='info_"+str(t[0])+"'>"+str(t[1])+"</div>"
+                       "<div class='edit' style='display: inline' id='info_"+str(t[0])+"'>"+cgi.escape(str(t[1]))+"</div>"
                        " - "
-                       "<div class='edit' style='display: inline' id='owner_"+str(t[0])+"'>"+str(t[2])+"</div>"
+                       "<div class='edit' style='display: inline' id='owner_"+str(t[0])+"'>"+cgi.escape(str(t[2]))+"</div>"
                        "</li>")
     oldtickets += ""
 
@@ -71,7 +71,7 @@ def application(env, start_response):
         target, index = args.get('id')[0].split('_')
         value = args.get('value')[0]
         db.set(target, value, index)
-        response_body = value
+        response_body = cgi.escape(value)
     else:
         # Create main web interface
         response_body = html % {"tickets": str(oldtickets)}
@@ -85,7 +85,7 @@ def application(env, start_response):
 def server():
     # WSGI server, passes request to application
     httpd = make_server(
-        'localhost', # Hostname
+        '0.0.0.0',   # Hostname
         8051,        # Port
         application  # Function to handle request
         )
