@@ -19,7 +19,9 @@ def hello(ircsock, channel):
          "add <TICKET INFO>  - Add a new ticket\n",
          "show               - Display all current tickets\n",
          "grab <TICKET ID>   - Assign ticket a owner\n",
-         "delete <TICKET ID> - Delete a specific ticket (NOT IMPLEMENTED YET!)\n")
+         "delete <TICKET ID> - Delete a specific ticket (NOT IMPLEMENTED YET!)\n\n"
+	 "Also check out my webserver running on http://%s:8051" 
+         % socket.gethostbyaddr(socket.gethostname())[0])
   for msg in msgs:
     ircsock.send("PRIVMSG "+channel+" :"+msg)
 
