@@ -41,13 +41,11 @@ def exists(index):
   return len(rows) > 0
 
 def grab(owner, index):
-  dbcon, cur = connect()
-  cur.execute("UPDATE tickets SET owner=? WHERE id=?", (owner, index))
-  close(dbcon)
+  set("owner", owner, index)
 
 def set(target, value, index):
   dbcon, cur = connect()
-  if target in ('info', 'owner', 'created', 'done', 'deleted'):
+  if target in ('info', 'owner', 'created', 'done'):
     sql = "UPDATE tickets SET %(target)s=? WHERE id=?" % {"target": target}
     cur.execute(sql, (value, index))
   else:
@@ -63,9 +61,9 @@ Get all tickets of these types:
 def getall(ticket_type="all"):
   dbcon, cur = connect()
   if ticket_type == 'active':
-    cur.execute("SELECT * FROM tickets WHERE done = 0 AND deleted = 0")
-  elif ticket_type == 'unpicked': 
-    cur.execute("SELECT * FROM tickets WHERE done = 0 AND deleted = 0 and owner IS NULL")
+    cur.execute("SELECT * FROM tickets WHERE done = 0")
+  elif ticket_type == 'ungrabbed':
+    cur.execute("SELECT * FROM tickets WHERE done = 0 AND owner IS NULL")
   else:
     cur.execute("SELECT * FROM tickets")
   rows = cur.fetchall()
