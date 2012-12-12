@@ -22,13 +22,16 @@ html = """
 <script src="http://www.appelsiini.net/download/jquery.jeditable.mini.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" charset="utf-8">
  $(document).ready(function() {
-     $('.new').editable('/new', {
-         style:  'inherit',
-         method: 'POST'
-     });
      $('.edit').editable('/edit', {
-         style:  'inherit',
-         method: 'POST'
+         style:  "inherit",
+         method: "POST"
+     });
+     $('.done').editable('/edit', {
+         type:   "select",
+         style:  "inherit",
+         data:   "{'%(finished)s':'%(finished)s','%(unfinished)s':'%(unfinished)s'}",
+         submit: "OK",
+         method: "POST"
      });
  });
 </script>
@@ -49,15 +52,38 @@ T I C K E T B L A S T E R
 </body>
 </html>"""
 
-# The WSGI application
+
+"""
+Generate tables of old tickets to edit or set as done
+"""
+def tickets_table(rows):
+    info_style = "class='edit' style='display: inline' id='info_%(index)s'>"
+    res = "<table>"
+    if len(rows) > 0:
+        res += "<tr><th></th><th></th><th>Description</th><th>Owner</th><th>Done</th></tr>"
+    for t in rows:
+        res += ("<tr>"
+                "<td>"+str(t[0])+"</td>"
+                "<td> - </td>"
+                "<td class='edit' style='display: inline' id='info_"+  str(t['id'])+"'>"+cgi.escape(str(t['info']))+"</td>"
+                "<td class='edit' style='display: inline' id='owner_"+ str(t['id'])+"'>"+cgi.escape(str(t['owner']))+"</td>"
+                "<td class='done' style='display: inline' id='done_"+  str(t['id'])+"'>"+done_snowflake[t['done']]+"</td>"
+                "</tr>")
+    res += "</table>"
+    return res
+
+"""
+The WSGI application
+"""
 def application(env, start_response):
-    body= ''  # b'' for consistency on Python 3.0
+    body= ''
     try:
         length=int(env.get('CONTENT_LENGTH', '0'))
     except ValueError:
         length= 0
-    if length!=0:
+    if length != 0:
         body=env['wsgi.input'].read(length)
+
     args = urlparse.parse_qs(body)
 
     # Add a new tickets
@@ -65,23 +91,23 @@ def application(env, start_response):
         db.add(args.get("ticket")[0])
 
     # List old tickets
-    oldtickets = ""
-    for t in db.getall():
-        oldtickets += ("<li>"
-                       "<div class='edit' style='display: inline' id='info_"+str(t[0])+"'>"+cgi.escape(str(t[1]))+"</div>"
-                       " - "
-                       "<div class='edit' style='display: inline' id='owner_"+str(t[0])+"'>"+cgi.escape(str(t[2]))+"</div>"
-                       "</li>")
-    oldtickets += ""
+    oldtickets = tickets_table(db.getall())
 
     if env['PATH_INFO'] == '/edit':
+        # Tiny edit (inlined)
+        print("Args: "+str(args))
         target, index = args.get('id')[0].split('_')
         value = args.get('value')[0]
-        db.set(target, value, index)
+        if target == "done":
+            db.set(target, done_snowflake[value], index)
+        else:
+            db.set(target, value, index)
         response_body = cgi.escape(value)
     else:
-        # Create main web interface
-        response_body = html % {"tickets": str(oldtickets)}
+        # Redraw main interface
+        response_body = html % {"tickets":    str(oldtickets),
+                                "finished":   finished,
+                                "unfinished": unfinished}
 
     status = '200 OK'
     response_headers = [('Content-Type', 'text/html'),
