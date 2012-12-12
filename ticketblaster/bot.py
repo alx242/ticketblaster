@@ -37,13 +37,20 @@ def show(ircsock, channel):
                  ": "+ticket[1].encode("utf-8")+"\n")
 
 def delete(ircsock, channel, id):
-  db.delete(id)
+  db.set('deleted', True, id)
   ircsock.send("PRIVMSG "+ channel +" : Removed ticket: "+id+" \n")
 
 def grab(ircsock, channel, owner, id):
-  db.grab(owner, id)
-  ircsock.send("PRIVMSG "+channel+" : Grabbed ticket: "+id+
-               ", go fix it!!! \n")
+  if db.exists(id):
+    db.grab(owner, id)
+    ircsock.send("PRIVMSG "+channel+" : Grabbed ticket: "+id+
+                 ", go fix it!!! \n")
+  else:
+    ircsock.send("PRIVMSG "+channel+" : No such ticket...\n")
+    
+
+def is_command(msg, botnick, command):
+  return msg.upper().find(botnick.upper()+": "+command.upper()) != -1
 
 # Connect and authenticate towards server
 def loop(server, port, channel, botnick):
@@ -67,23 +74,23 @@ def loop(server, port, channel, botnick):
       ping(ircsock)
 
     # If we can find "Hello Mybot" it will call the function hello()
-    elif ircmsg.upper().find(" HELLO") != -1:
+    elif is_command(ircmsg, botnick, "hello"):
       hello(ircsock, channel)
 
     # Add a new ticket
-    elif ircmsg.upper().find(" ADD") != -1:
+    elif is_command(ircmsg, botnick, "add"):
       add(ircsock, channel, ircmsg[ircmsg.upper().find(" ADD")+4:])
 
     # Get all
-    elif ircmsg.upper().find(" SHOW") != -1:
+    elif is_command(ircmsg, botnick, "show"):
       show(ircsock, channel)
 
     # Delete a ticket
-    elif ircmsg.upper().find(" DEL") != -1:
+    elif is_command(ircmsg, botnick, "del"):
       delete(ircsock, channel, ircmsg[ircmsg.upper().find(" DEL")+4:])
 
     # Grab a ticket
-    elif ircmsg.upper().find(" GRAB") != -1:
+    elif is_command(ircmsg, botnick, "grab"):
       grab(ircsock, channel,
            ircmsg[ircmsg.upper().find(":")+1:ircmsg.upper().find("!")],
            ircmsg[ircmsg.upper().find(" GRAB")+5:])
