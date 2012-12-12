@@ -14,10 +14,10 @@ def close(dbcon):
 def init():
   dbcon, cur = connect()
   sql = ("CREATE TABLE tickets(id INTEGER PRIMARY KEY, "
-         "info TEXT, owner VARCHAR(32), "
-         "created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
-         "done BOOLEAN DEFAULT 0, "
-         "deleted BOOLEAN DEFAULT 0)")
+         "                     info TEXT, "
+         "                     owner VARCHAR(32), "
+         "                     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+         "                     done BOOLEAN DEFAULT 0) ")
   cur.execute(sql)
   close(dbcon)
 
