@@ -8,6 +8,13 @@ import cgi
 import db
 import urllib
 
+unfinished = "Not finished"
+finished   = "Done"
+done_snowflake = {unfinished: 0,
+                  finished:   1,
+                  0:          unfinished,
+                  1:          finished}
+
 html = """
 <html>
 <head>
@@ -82,6 +89,9 @@ def application(env, start_response):
     start_response(status, response_headers)
     return [response_body]
 
+"""
+Server launcher
+"""
 def server():
     # WSGI server, passes request to application
     httpd = make_server(
@@ -92,6 +102,8 @@ def server():
     print "TICKETBLASTER - WSGI> Server launched and ready to serve"
     httpd.serve_forever()
 
-# Launch the server in case a recular call is done
+"""
+Launch the server in case a recular call is done
+"""
 if __name__ == '__main__':
     server()
