@@ -2,9 +2,10 @@ import sqlite3
 import os
 
 def connect():
-  dbcon = sqlite3.connect('ticketblaster.db')
-  cur = dbcon.cursor()
-  return dbcon, cur
+  conn = sqlite3.connect('ticketblaster.db')
+  conn.row_factory = sqlite3.Row
+  cur = conn.cursor()
+  return conn, cur
 
 def close(dbcon):
   dbcon.commit()
