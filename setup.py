@@ -4,7 +4,7 @@
 from setuptools import setup
 
 setup(name='ticketblaster',
-      version='0.7',
+      version='0.8',
       description='Quick tickets, blasted up using WSGI and a IRC-bot',
       long_description = open('README').read(),
       url='http://github.com/alx242/ticketblaster',
