@@ -94,7 +94,7 @@ def loop(server, port, channel, botnick):
 
     # Add a new ticket
     elif is_command(ircmsg, botnick, "add"):
-      add(ircsock, channel, info_parse(ircmsg, "add")
+      add(ircsock, channel, info_parse(ircmsg, "add"))
 
     # Get all
     elif is_command(ircmsg, botnick, "show"):
@@ -102,7 +102,7 @@ def loop(server, port, channel, botnick):
 
     # Finish a ticket
     elif is_command(ircmsg, botnick, "done"):
-      done(ircsock, channel, info_parse(ircmsg, "done"):])
+      done(ircsock, channel, info_parse(ircmsg, "done"))
 
     # Grab a ticket
     elif is_command(ircmsg, botnick, "grab"):
