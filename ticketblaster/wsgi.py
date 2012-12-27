@@ -86,12 +86,15 @@ def application(env, start_response):
 
     args = urlparse.parse_qs(body)
 
-    # Add a new tickets
+    # Add a new tickets and redirect to standard location (reload
+    # won't trigger any new entries or such)
     if env['PATH_INFO'] == '/new':
         db.add(args.get("ticket")[0])
+        start_response('301 Redirect', [('Location', '/'),])
+        return []
 
     # List old tickets
-    oldtickets = tickets_table(db.getall(ticket_type=active))
+    oldtickets = tickets_table(db.getall(ticket_type='active'))
 
     if env['PATH_INFO'] == '/edit':
         # Tiny edit (inlined)
