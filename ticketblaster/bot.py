@@ -58,14 +58,14 @@ def is_command(msg, botnick, command):
 
 # Find the sending nick in message
 def nick_pars(msg):
-  msg[msg.upper().find(":")+1:msg.upper().find("!")]
+  return msg[msg.upper().find(":")+1:msg.upper().find("!")].strip()
 
 # Get the info part of a message (whatever comes after a command)
 #
 # E.g: " GRAB 1", " ADD Fix coffe"...
 def info_parse(msg, cmd):
   space_cmd = " "+cmd.upper() # All commands must begin with a space
-  msg[msg.upper().find(space_cmd)+len(space_cmd):]
+  return msg[msg.upper().find(space_cmd)+len(space_cmd):].strip()
 
 # Connect and authenticate towards server
 def loop(server, port, channel, botnick):
