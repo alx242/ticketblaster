@@ -91,7 +91,7 @@ def application(env, start_response):
         db.add(args.get("ticket")[0])
 
     # List old tickets
-    oldtickets = tickets_table(db.getall())
+    oldtickets = tickets_table(db.getall(ticket_type=active))
 
     if env['PATH_INFO'] == '/edit':
         # Tiny edit (inlined)

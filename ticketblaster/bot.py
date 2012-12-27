@@ -32,7 +32,7 @@ def add(ircsock, channel, info):
 
 # Show current set of tickets
 def show(ircsock, channel):
-  tickets = db.getall()
+  tickets = db.getall(ticket_type=active)
   ircsock.send("PRIVMSG "+channel+" :Current available tickets:\n")
   for ticket in tickets:
     ircsock.send("PRIVMSG "+channel+" : - "+str(ticket[0])+
