@@ -73,16 +73,20 @@ def info_parse(msg, cmd):
 # remind everyone there is something to do
 #
 #
-def random_burp(ircsock, channel):
+def random_burp(ircsock, channel, last_burp):
   tickets = db.getall(ticket_type='active')
-  if (datetime.now().minute == 0 and
-      random.randint(0,2) > 0    and
+  if (datetime.now().hour != last_burp and
+      datetime.now().minute == 0       and
+      random.randint(0,2) > 0          and
       len(tickets) > 0):
     ircsock.send("PRIVMSG "+channel+" :Wake up there are tickets to be done!!!\n\n")
     show(ircsock, channel)
+    last_burp = datetime.now().hour
+  return last_burp
 
 # Connect and authenticate towards server
 def loop(server, port, channel, botnick):
+  last_burp = 0 # Keep track of when we last burped
   ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   ircsock.connect((server, port))
   ircsock.send("USER "+botnick+
@@ -93,13 +97,11 @@ def loop(server, port, channel, botnick):
   joinchan(ircsock, channel) # Join the channel using the functions we previously defined
 
   # Bot loop
-  while 1: # Be careful with these! It might send you to an infinite loop
+  while True:
     ircmsg = ircsock.recv(2048) # Receive data from the server
     ircmsg = ircmsg.strip('\n\r') # Removing any unnecessary linebreaks.
     print(ircmsg) # Print whatever the server say on stdout
-
-    random_burp(ircsock, channel)
-
+    last_burp = random_burp(ircsock, channel, last_burp)
     # If the server pings us then we've got to respond!
     if ircmsg.find("PING :") != -1:
       ping(ircsock)
