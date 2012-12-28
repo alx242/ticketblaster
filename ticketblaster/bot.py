@@ -74,7 +74,7 @@ def info_parse(msg, cmd):
 #
 #
 def random_burp(ircsock, channel):
-  tickets = db:getall(ticket_type='active')
+  tickets = db.getall(ticket_type='active')
   if (datetime.now().minute == 0 and
       random.randint(0,2) > 0    and
       len(tickets) > 0):
