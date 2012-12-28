@@ -1,5 +1,7 @@
 import socket
 import db
+from datetime import datetime
+import random
 
 # Respond to server pings.
 def ping(ircsock):
@@ -67,6 +69,18 @@ def info_parse(msg, cmd):
   space_cmd = " "+cmd.upper() # All commands must begin with a space
   return msg[msg.upper().find(space_cmd)+len(space_cmd):].strip()
 
+# Every hour there is a possibility we burp out the current tickets to
+# remind everyone there is something to do
+#
+#
+def random_burp(ircsock, channel):
+  tickets = db:getall(ticket_type='active')
+  if (datetime.now().minute == 0 and
+      random.randint(0,2) > 0    and
+      len(tickets) > 0):
+    ircsock.send("PRIVMSG "+channel+" :Wake up there are tickets to be done!!!\n\n")
+    show(ircsock, channel)
+
 # Connect and authenticate towards server
 def loop(server, port, channel, botnick):
   ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -83,6 +97,8 @@ def loop(server, port, channel, botnick):
     ircmsg = ircsock.recv(2048) # receive data from the server
     ircmsg = ircmsg.strip('\n\r') # removing any unnecessary linebreaks.
     print(ircmsg) # Here we print what's coming from the server
+
+    random_burp(ircsock, channel)
 
     # If the server pings us then we've got to respond!
     if ircmsg.find("PING :") != -1:
