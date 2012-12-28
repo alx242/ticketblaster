@@ -94,32 +94,27 @@ def loop(server, port, channel, botnick):
 
   # Bot loop
   while 1: # Be careful with these! It might send you to an infinite loop
-    ircmsg = ircsock.recv(2048) # receive data from the server
-    ircmsg = ircmsg.strip('\n\r') # removing any unnecessary linebreaks.
-    print(ircmsg) # Here we print what's coming from the server
+    ircmsg = ircsock.recv(2048) # Receive data from the server
+    ircmsg = ircmsg.strip('\n\r') # Removing any unnecessary linebreaks.
+    print(ircmsg) # Print whatever the server say on stdout
 
     random_burp(ircsock, channel)
 
     # If the server pings us then we've got to respond!
     if ircmsg.find("PING :") != -1:
       ping(ircsock)
-
     # If we can find "Hello Mybot" it will call the function hello()
     elif is_command(ircmsg, botnick, "hello"):
       hello(ircsock, channel)
-
     # Add a new ticket
     elif is_command(ircmsg, botnick, "add"):
       add(ircsock, channel, info_parse(ircmsg, "add"))
-
     # Get all
     elif is_command(ircmsg, botnick, "show"):
       show(ircsock, channel)
-
     # Finish a ticket
     elif is_command(ircmsg, botnick, "done"):
       done(ircsock, channel, info_parse(ircmsg, "done"))
-
     # Grab a ticket
     elif is_command(ircmsg, botnick, "grab"):
       grab(ircsock, channel, nick_pars(ircmsg), info_parse(ircmsg, "grab"))
