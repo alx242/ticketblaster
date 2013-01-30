@@ -1,15 +1,18 @@
 import sqlite3
 import os
 
+
 def connect():
   conn = sqlite3.connect('ticketblaster.db')
   conn.row_factory = sqlite3.Row
   cur = conn.cursor()
   return conn, cur
 
+
 def close(dbcon):
   dbcon.commit()
   dbcon.close()
+
 
 def init():
   dbcon, cur = connect()
@@ -21,13 +24,16 @@ def init():
   cur.execute(sql)
   close(dbcon)
 
+
 def already_exists():
   return os.path.isfile("ticketblaster.db")
+
 
 def add(info):
   dbcon, cur = connect()
   cur.execute("INSERT INTO tickets(info) VALUES(?)", (info,))
   close(dbcon)
+
 
 def get(index):
   dbcon, cur = connect()
@@ -36,12 +42,15 @@ def get(index):
   close(dbcon)
   return rows
 
+
 def exists(index):
   rows = get(index)
   return len(rows) > 0
 
+
 def grab(owner, index):
   set("owner", owner, index)
+
 
 def set(target, value, index):
   dbcon, cur = connect()
@@ -52,13 +61,14 @@ def set(target, value, index):
     raise Exception("unsupported_sql_value")
   close(dbcon)
 
-"""
-Get all tickets of these types:
- - active
- - ungrabbed
- - all
-"""
+
 def getall(ticket_type="all"):
+  """
+  Get all tickets of these types:
+  - active
+  - ungrabbed
+  - all
+  """
   dbcon, cur = connect()
   if ticket_type == 'active':
     cur.execute("SELECT * FROM tickets WHERE done = 0")
@@ -69,4 +79,3 @@ def getall(ticket_type="all"):
   rows = cur.fetchall()
   close(dbcon)
   return rows
-

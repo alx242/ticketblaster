@@ -3,20 +3,24 @@ import db
 from datetime import datetime
 import random
 
-# Respond to server pings.
+
 def ping(ircsock):
+  """ Respond to server pings. If not the server will close the connection """
   ircsock.send("PONG :Pong\n")
 
-# Send message to channels
-def sendmsg(chan , msg):
-  ircsock.send("PRIVMSG "+ chan +" :"+ msg +"\n")
 
-# Join channel
+def sendmsg(ircsock, chan, msg):
+  """ Send message to channels """
+  ircsock.send("PRIVMSG " + chan + " :" + msg + "\n")
+
+
 def joinchan(ircsock, chan):
-  ircsock.send("JOIN "+ chan +"\n")
+  """ Join channel """
+  ircsock.send("JOIN " + chan + "\n")
 
-# Responds to a user that inputs "Hello Mybot"
+
 def hello(ircsock, channel):
+  """ Responds to a user that inputs "Hello Mybot" """
   msgs = ("Hello! I currently accept these commands:\n",
           "add <TICKET INFO> - Add a new ticket\n",
           "show              - Display all current tickets\n",
@@ -25,82 +29,96 @@ def hello(ircsock, channel):
           "Also check out my webserver running on http://%s:8051"
           % socket.gethostbyaddr(socket.gethostname())[0])
   for msg in msgs:
-    ircsock.send("PRIVMSG "+channel+" :"+msg)
+    ircsock.send("PRIVMSG " + channel + " :" + msg)
 
-# Add a new ticket
+
 def add(ircsock, channel, info):
+  """ Add a new ticket """
   db.add(info)
-  ircsock.send("PRIVMSG "+channel+" :Added new ticket!\n")
+  ircsock.send("PRIVMSG " + channel + " :Added new ticket!\n")
 
-# Show current set of tickets
+
 def show(ircsock, channel):
+  """ Show current set of tickets """
   tickets = db.getall(ticket_type='active')
-  ircsock.send("PRIVMSG "+channel+" :Current available tickets:\n")
+  ircsock.send("PRIVMSG " + channel + " :Current available tickets:\n")
   for ticket in tickets:
-    ircsock.send("PRIVMSG "+channel+" : - "+str(ticket[0])+
-                 ": "+ticket[1].encode("utf-8")+"\n")
+    ircsock.send("PRIVMSG " + channel + " : - " + str(ticket[0]) +
+                 ": " + ticket[1].encode("utf-8") + "\n")
 
-# Mark a ticket as finished
+
 def done(ircsock, channel, id):
+  """ Mark a ticket as finished """
   db.set('done', True, id)
-  ircsock.send("PRIVMSG "+ channel +" : Finished ticket: "+id+" \n")
+  ircsock.send("PRIVMSG " + channel + " : Finished ticket: " + id + " \n")
 
-# Take and assign a ticket to the messanger
+
 def grab(ircsock, channel, owner, id):
+  """ Take and assign a ticket to the messanger """
   if db.exists(id):
     db.grab(owner, id)
-    ircsock.send("PRIVMSG "+channel+" : Grabbed ticket: "+id+
+    ircsock.send("PRIVMSG " + channel + " : Grabbed ticket: " + id +
                  ", go fix it!!! \n")
   else:
-    ircsock.send("PRIVMSG "+channel+" : No such ticket...\n")
+    ircsock.send("PRIVMSG " + channel + " : No such ticket...\n")
 
-# Check if this is a message includes a specific command
+
 def is_command(msg, botnick, command):
-  return msg.upper().find(botnick.upper()+": "+command.upper()) != -1
+  """ Check if this is a message includes a specific command """
+  return msg.upper().find(botnick.upper() + ": " + command.upper()) != -1
 
-# Find the sending nick in message
+
 def nick_pars(msg):
-  return msg[msg.upper().find(":")+1:msg.upper().find("!")].strip()
+  """ Find the sending nick in message """
+  return msg[msg.upper().find(":") + 1:msg.upper().find("!")].strip()
 
-# Get the info part of a message (whatever comes after a command)
-#
-# E.g: " GRAB 1", " ADD Fix coffe"...
+
 def info_parse(msg, cmd):
-  space_cmd = " "+cmd.upper() # All commands must begin with a space
-  return msg[msg.upper().find(space_cmd)+len(space_cmd):].strip()
+  """
+  Get the info part of a message (whatever comes after a command)
+  E.g: " GRAB 1", " ADD Fix coffe"...
+  """
+  space_cmd = " " + cmd.upper()  # All commands must begin with a space
+  return msg[msg.upper().find(space_cmd) + len(space_cmd):].strip()
 
-# Every hour there is a possibility we burp out the current tickets to
-# remind everyone there is something to do
-#
-#
+
 def random_burp(ircsock, channel, last_burp):
+  """
+  Every hour there is a possibility we burp out the current tickets to
+  remind everyone there is something to do
+  """
   tickets = db.getall(ticket_type='active')
-  if (datetime.now().hour != last_burp and
-      datetime.now().minute == 0       and
-      random.randint(0,2) > 0          and
-      len(tickets) > 0):
-    ircsock.send("PRIVMSG "+channel+" :Wake up there are tickets to be done!!!\n\n")
+  if (datetime.now().hour != last_burp
+      and datetime.now().minute == 0
+      and random.randint(0, 2) > 0
+      and len(tickets) > 0):
+    ircsock.send("PRIVMSG " + channel +
+                 " :Wake up there are tickets to be done!!!\n\n")
     show(ircsock, channel)
     last_burp = datetime.now().hour
   return last_burp
 
-# Connect and authenticate towards server
+
 def loop(server, port, channel, botnick):
-  last_burp = 0 # Keep track of when we last burped
+  """
+  Connect and authenticate towards server then proceeds to put itself
+  into the "neverending-loop" against the irc server
+  """
+  last_burp = 0  # Keep track of when we last burped
   ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   ircsock.connect((server, port))
-  ircsock.send("USER "+botnick+
-               " "+botnick+
-               " "+botnick+
+  ircsock.send("USER " + botnick +
+               " " + botnick +
+               " " + botnick +
                " :BOOOOT!\n")
-  ircsock.send("NICK "+botnick+"\n")
-  joinchan(ircsock, channel) # Join the channel using the functions we previously defined
-
+  ircsock.send("NICK " + botnick + "\n")
+  # Join the channel using the functions we previously defined
+  joinchan(ircsock, channel)
   # Bot loop
   while True:
-    ircmsg = ircsock.recv(2048) # Receive data from the server
-    ircmsg = ircmsg.strip('\n\r') # Removing any unnecessary linebreaks.
-    print(ircmsg) # Print whatever the server say on stdout
+    ircmsg = ircsock.recv(2048)  # Receive data from the server
+    ircmsg = ircmsg.strip('\n\r')  # Removing any unnecessary linebreaks.
+    print(ircmsg)  # Print whatever the server say on stdout
     last_burp = random_burp(ircsock, channel, last_burp)
     # If the server pings us then we've got to respond!
     if ircmsg.find("PING :") != -1:
@@ -120,4 +138,3 @@ def loop(server, port, channel, botnick):
     # Grab a ticket
     elif is_command(ircmsg, botnick, "grab"):
       grab(ircsock, channel, nick_pars(ircmsg), info_parse(ircmsg, "grab"))
-
