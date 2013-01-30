@@ -6,10 +6,10 @@ from wsgiref.simple_server import make_server
 import urlparse
 import cgi
 import db
-import urllib
+# import urllib
 
 unfinished = "Not finished"
-finished   = "Done"
+finished = "Done"
 done_snowflake = {unfinished: 0,
                   finished:   1,
                   0:          unfinished,
@@ -18,8 +18,10 @@ done_snowflake = {unfinished: 0,
 html = """
 <html>
 <head>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js" type="text/javascript" charset="utf-8"></script>
-<script src="http://www.appelsiini.net/download/jquery.jeditable.mini.js" type="text/javascript" charset="utf-8"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"
+        type="text/javascript" charset="utf-8"></script>
+<script src="http://www.appelsiini.net/download/jquery.jeditable.mini.js"
+        type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" charset="utf-8">
  $(document).ready(function() {
      $('.edit').editable('/edit', {
@@ -29,7 +31,8 @@ html = """
      $('.done').editable('/edit', {
          type:   "select",
          style:  "inherit",
-         data:   "{'%(finished)s':'%(finished)s','%(unfinished)s':'%(unfinished)s'}",
+         data:   "{'%(finished)s':'%(finished)s',
+                   '%(unfinished)s':'%(unfinished)s'}",
          submit: "OK",
          method: "POST"
      });
@@ -53,36 +56,41 @@ T I C K E T B L A S T E R
 </html>"""
 
 
-"""
-Generate tables of old tickets to edit or set as done
-"""
 def tickets_table(rows):
-    info_style = "class='edit' style='display: inline' id='info_%(index)s'>"
+    """
+    Generate tables of old tickets to edit or set as done
+    """
+    # info_style = "class='edit' style='display: inline' id='info_%(index)s'>"
     res = "<table>"
     if len(rows) > 0:
-        res += "<tr><th></th><th></th><th>Description</th><th>Owner</th><th>Done</th></tr>"
+        res += ("<tr><th></th><th></th>"
+                "<th>Description</th><th>Owner</th><th>Done</th></tr>")
     for t in rows:
         res += ("<tr>"
-                "<td>"+str(t[0])+"</td>"
+                "<td>" + str(t[0]) + "</td>"
                 "<td> - </td>"
-                "<td class='edit' style='display: inline' id='info_"+  str(t['id'])+"'>"+cgi.escape(str(t['info']))+"</td>"
-                "<td class='edit' style='display: inline' id='owner_"+ str(t['id'])+"'>"+cgi.escape(str(t['owner']))+"</td>"
-                "<td class='done' style='display: inline' id='done_"+  str(t['id'])+"'>"+done_snowflake[t['done']]+"</td>"
+                "<td class='edit' style='display: inline' id='info_" +
+                str(t['id']) + "'>" + cgi.escape(str(t['info'])) + "</td>"
+                "<td class='edit' style='display: inline' id='owner_" +
+                str(t['id']) + "'>" + cgi.escape(str(t['owner'])) + "</td>"
+                "<td class='done' style='display: inline' id='done_" +
+                str(t['id']) + "'>" + done_snowflake[t['done']] + "</td>"
                 "</tr>")
     res += "</table>"
     return res
 
-"""
-The WSGI application
-"""
+
 def application(env, start_response):
-    body= ''
+    """
+    The WSGI application
+    """
+    body = ''
     try:
-        length=int(env.get('CONTENT_LENGTH', '0'))
+        length = int(env.get('CONTENT_LENGTH', '0'))
     except ValueError:
-        length= 0
+        length = 0
     if length != 0:
-        body=env['wsgi.input'].read(length)
+        body = env['wsgi.input'].read(length)
 
     args = urlparse.parse_qs(body)
 
@@ -90,7 +98,7 @@ def application(env, start_response):
     # won't trigger any new entries or such)
     if env['PATH_INFO'] == '/new':
         db.add(args.get("ticket")[0])
-        start_response('301 Redirect', [('Location', '/'),])
+        start_response('301 Redirect', [('Location', '/')])
         return []
 
     # List old tickets
@@ -98,7 +106,7 @@ def application(env, start_response):
 
     if env['PATH_INFO'] == '/edit':
         # Tiny edit (inlined)
-        print("Args: "+str(args))
+        print("Args: " + str(args))
         target, index = args.get('id')[0].split('_')
         value = args.get('value')[0]
         if target == "done":
@@ -118,21 +126,21 @@ def application(env, start_response):
     start_response(status, response_headers)
     return [response_body]
 
-"""
-Server launcher
-"""
+
 def server():
-    # WSGI server, passes request to application
+    """
+    Server launcher, WSGI server, passes request to application
+    """
     httpd = make_server(
-        '0.0.0.0',   # Hostname
-        8051,        # Port
-        application  # Function to handle request
-        )
+        '0.0.0.0',    # Hostname
+        8051,         # Port
+        application)  # Function to handle request
     print "TICKETBLASTER - WSGI> Server launched and ready to serve"
     httpd.serve_forever()
 
-"""
-Launch the server in case a recular call is done
-"""
+
 if __name__ == '__main__':
+    """
+    Launch the server in case a recular call is done
+    """
     server()
