@@ -79,7 +79,7 @@ def info_parse(msg, cmd):
   E.g: " GRAB 1", " ADD Fix coffe"...
   """
   space_cmd = " " + cmd.upper()  # All commands must begin with a space
-  return msg[msg.upper().find(space_cmd) + len(space_cmd):].strip()
+  return unicode(msg[msg.upper().find(space_cmd) + len(space_cmd):].strip(), 'UTF-8')
 
 
 def random_burp(ircsock, channel, last_burp):
