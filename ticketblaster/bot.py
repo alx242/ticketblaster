@@ -43,8 +43,13 @@ def show(ircsock, channel):
   tickets = db.getall(ticket_type='active')
   sendmsg(ircsock, channel, "Current available tickets:")
   for ticket in tickets:
-    sendmsg(ircsock, channel, " - " + str(ticket[0]) +
-            ": " + ticket[1].encode("utf-8"))
+    show(ircsock, channel, ticket)
+
+
+def show(ircsock, channel, ticket):
+  """ Show one ticket """
+  sendmsg(ircsock, channel, " - " + str(ticket[0]) +
+          ": " + ticket[1].encode("utf-8"))
 
 
 def done(ircsock, channel, index):
@@ -85,17 +90,21 @@ def info_parse(msg, cmd):
 
 def random_burp(ircsock, channel, last_burp):
   """
-  Every hour there is a possibility we burp out the current tickets to
-  remind everyone there is something to do
+  Every working hour there is a possibility we burp out a ticket to do
+  to remind everyone...
   """
   tickets = db.getall(ticket_type='active')
-  if (datetime.now().hour != last_burp
-      and datetime.now().minute == 0
-      and random.randint(0, 2) > 0
-      and len(tickets) > 0):
-    sendmsg(ircsock, channel, "Wake up there are tickets to be done!!!\n")
-    show(ircsock, channel)
-    last_burp = datetime.now().hour
+  if ((datetime.now().day != last_burp.day
+       and datetime.now().hour != last_burp.hour
+       and datetime.now().hour > 9
+       and datetime.now().hour < 18
+       and datetime.now().minute == 0
+       and (random.randint(0, 2) > 0)
+       and len(tickets) > 0)):
+    # Display one random ticket to do
+    sendmsg(ircsock, channel, "Need something to do?")
+    show(ircsock, channel, tickets[random.randint(0, len(tickets))])
+    last_burp = datetime.now()
   return last_burp
 
 
