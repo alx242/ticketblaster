@@ -1,6 +1,7 @@
 import socket
 import db
 from datetime import datetime
+from datetime import timedelta
 import random
 
 
@@ -43,10 +44,10 @@ def show(ircsock, channel):
   tickets = db.getall(ticket_type='active')
   sendmsg(ircsock, channel, "Current available tickets:")
   for ticket in tickets:
-    show(ircsock, channel, ticket)
+    show_one(ircsock, channel, ticket)
 
 
-def show(ircsock, channel, ticket):
+def show_one(ircsock, channel, ticket):
   """ Show one ticket """
   sendmsg(ircsock, channel, " - " + str(ticket[0]) +
           ": " + ticket[1].encode("utf-8"))
@@ -103,7 +104,7 @@ def random_burp(ircsock, channel, last_burp):
        and len(tickets) > 0)):
     # Display one random ticket to do
     sendmsg(ircsock, channel, "Need something to do?")
-    show(ircsock, channel, tickets[random.randint(0, len(tickets))])
+    show_one(ircsock, channel, tickets[random.randint(0, len(tickets))])
     last_burp = datetime.now()
   return last_burp
 
@@ -113,7 +114,9 @@ def loop(server, port, channel, botnick):
   Connect and authenticate towards server then proceeds to put itself
   into the "neverending-loop" against the irc server
   """
-  last_burp = 0  # Keep track of when we last burped
+  # Keep track of when we last burped, init from yesterday to get
+  # going.
+  last_burp = datetime.today() - timedelta(hours=1, days=1)
   ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   ircsock.connect((server, port))
   ircsock.send("USER " + botnick +
