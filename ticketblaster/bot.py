@@ -104,7 +104,7 @@ def random_burp(ircsock, channel, last_burp):
        and len(tickets) > 0)):
     # Display one random ticket to do
     sendmsg(ircsock, channel, "Need something to do?")
-    show_one(ircsock, channel, tickets[random.randint(0, len(tickets))])
+    show_one(ircsock, channel, tickets[random.randint(0, len(tickets)-1)])
     last_burp = datetime.now()
   return last_burp
 
